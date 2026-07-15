@@ -22,7 +22,7 @@ button{font-family:var(--sans);cursor:pointer;background:none;border:none;color:
 
 /* ---------- ticker ---------- */
 .ticker{position:fixed;top:0;left:0;right:0;height:34px;z-index:50;display:flex;align-items:center;
-  border-bottom:1px solid var(--line);overflow:hidden;white-space:nowrap;background:var(--bg);transition:background .7s}
+  border-bottom:1px solid var(--line);overflow:hidden;white-space:nowrap;background:var(--bg);transition:background .7s,opacity .5s}
 .tk{display:inline-block;animation:tkm 70s linear infinite;font-family:var(--cond);font-weight:500;
   font-size:11.5px;letter-spacing:.18em;text-transform:uppercase}
 .tk b{font-weight:600;color:var(--acc)}
@@ -33,6 +33,9 @@ button{font-family:var(--sans);cursor:pointer;background:none;border:none;color:
 body[data-theme="dark"] .tk b.neg{color:#D9825B}
 body[data-theme="dark"] .tk b.pos{color:#8FBF9F}
 @keyframes tkm{to{transform:translateX(-50%)}}
+.ticker:hover .tk{animation-play-state:paused}
+body.dimticker .ticker{opacity:.4}
+.scrollhint{display:none}
 
 /* ---------- header ---------- */
 header{position:fixed;top:34px;left:0;right:0;height:60px;display:flex;align-items:center;
@@ -90,10 +93,17 @@ header{position:fixed;top:34px;left:0;right:0;height:60px;display:flex;align-ite
 .tl .dot.done{border-color:var(--acc);background:var(--acc)}
 .tl .dot.cur{border-color:var(--acc);background:var(--acc);box-shadow:0 0 0 5px color-mix(in srgb,var(--acc) 22%,transparent)}
 .tl .gate{position:absolute;top:9px;transform:translateX(-50%) rotate(45deg);width:10px;height:10px;
-  background:var(--acc);opacity:0;transition:.4s}
+  background:var(--acc);opacity:.28;transition:.4s}
 .tl .gatelab{position:absolute;top:-9px;transform:translateX(-50%);font-family:var(--cond);font-size:10px;font-weight:600;
   letter-spacing:.2em;color:var(--acc);text-transform:uppercase;opacity:0;transition:.4s;white-space:nowrap}
 body.gates .tl .gate,body.gates .tl .gatelab{opacity:1}
+.tl .actlab{position:absolute;top:38px;transform:translateX(-50%);font-family:var(--cond);font-size:9px;font-weight:600;
+  letter-spacing:.14em;text-transform:uppercase;color:var(--muted);white-space:nowrap;opacity:.75}
+.tl .actdiv{position:absolute;top:33px;width:1px;height:10px;background:var(--line)}
+.tltip{position:fixed;z-index:60;pointer-events:none;background:var(--ink);color:var(--bg);
+  font-family:var(--cond);font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;
+  padding:5px 10px;white-space:nowrap;transform:translate(-50%,-125%);opacity:0;transition:opacity .14s}
+.tltip.on{opacity:1}
 .beatcount{font-family:var(--cond);font-size:11px;color:var(--muted);letter-spacing:.16em;flex:none;width:56px;text-align:center}
 
 /* ---------- orbit diagram ---------- */
@@ -231,9 +241,13 @@ body[data-beat="11"] .askwrap{display:flex;flex-direction:column}
 /* ---------- responsive ---------- */
 @media (max-width:900px){
   body{overflow:auto}
-  .stage{position:static;display:block;margin-top:94px}
-  .dwrap{padding:10px;height:52vh}
-  .rail{padding:6px 22px 120px;border-left:none}
+  .stage{position:static;display:flex;flex-direction:column;margin-top:94px}
+  .rail{order:1;padding:16px 20px 4px;border-left:none}
+  .dwrap{order:2;display:block;padding:4px 0 0;height:auto;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch}
+  .dwrap svg{display:block;width:760px;min-width:760px;max-width:none;height:auto;max-height:none;margin:0 auto}
+  .scrollhint{display:block;order:3;text-align:center;font-family:var(--cond);font-size:10.5px;font-weight:600;
+    letter-spacing:.16em;text-transform:uppercase;color:var(--muted);padding:12px 0 108px}
+  .tl .actlab,.tl .actdiv{display:none}
   .rail h2{font-size:26px}
   .statrow{grid-template-columns:1fr 1fr}
   .mgrid{grid-template-columns:1fr}
@@ -280,6 +294,7 @@ body[data-beat="11"] .askwrap{display:flex;flex-direction:column}
     <div class="actions" id="beatActions"></div>
     <div class="askwrap" id="askwrap"></div>
   </aside>
+  <div class="scrollhint" aria-hidden="true">&#8646;&nbsp; swipe the diagram to explore</div>
 </main>
 
 <footer class="scrub">
@@ -356,7 +371,7 @@ function refreshChips(){var m=compute();
 function act(label,drill,ghost){return {label:label,drill:drill,ghost:!!ghost}}
 var BEATS=[
 /* 01 — the model */
-{theme:'cream',layout:'scene01',ey:'The model',yr:'2026',pipe:'A CAREER FIELD | ONE CARRIER | THE WORKSITE',
+{theme:'tan',layout:'scene01',ey:'The model',yr:'2026',pipe:'A CAREER FIELD | ONE CARRIER | THE WORKSITE',
  t:'This is the model that built Aflac.',
  b:'A career field selling one carrier’s products at the worksite, account by account. It made Aflac the number one supplemental carrier in the United States, with FY2025 US sales of <b>$1.6B</b>, up <b>3.1 percent</b>. The next two frames put pressure on it.',
  acts:[],kick:'',big:'',sub:'',specs:[]},
@@ -387,7 +402,7 @@ var BEATS=[
  b:'The captive channel <b>continues untouched</b>. <b>Formation</b> is the route for producers ready for it: <b>accident, cancer, critical illness, and hospital plans are always Aflac</b>, and adjacent lines lead with Aflac, with room to place another carrier where it fits the client better.',
  acts:[act('The product posture','posture')],kick:'',big:'',sub:'',specs:[]},
 /* 07 — the proof */
-{theme:'tan',layout:'scene07',ey:'The proof',yr:'already live',pipe:'FIVE MARKETS | LIVE | IN PRODUCTION',
+{theme:'cream',layout:'scene07',ey:'The proof',yr:'already live',pipe:'FIVE MARKETS | LIVE | IN PRODUCTION',
  t:'It is already working.',
  b:'In the ICHRA pilot, a robust account rises from <span class="stat">$3,308</span> to <span class="stat">$24,728</span> for the agent, with premium up <b>25 to 145 percent</b> across five pilot markets. Not a projection. Production. Closed with Empowered Benefits as the broker.',
  acts:[act('Inside the pilot','pilot')],kick:'',big:'',sub:'',specs:[]},
@@ -752,6 +767,7 @@ function setBeat(n,instant){
   document.body.setAttribute('data-beat',n);
   document.body.setAttribute('data-theme',bt.theme);
   document.body.classList.toggle('gates',n>=8);
+  document.body.classList.toggle('dimticker',n===6||n===7||n===11);
   renderBeat(bt,n);
   $('beatEyebrow').textContent='№ '+(n+1<10?'0':'')+(n+1)+' — '+bt.ey;
   $('beatYr').textContent=bt.yr;
@@ -795,11 +811,21 @@ function setBeat(n,instant){
   $('prevB').disabled=(n===0);$('nextB').disabled=(n===N-1);
 }
 
-/* timeline dots + gates */
+/* timeline dots + gates + acts + hover tooltip */
 (function(){var tl=$('tl');
+  var tip=document.createElement('div');tip.className='tltip';document.body.appendChild(tip);
   for(var i=0;i<N;i++){var d=document.createElement('button');d.className='dot';
-    d.style.left=(i/(N-1)*100)+'%';d.setAttribute('aria-label','Frame '+(i+1));
-    (function(k){d.onclick=function(){setBeat(k)}})(i);tl.appendChild(d)}
+    d.style.left=(i/(N-1)*100)+'%';d.setAttribute('aria-label','Frame '+(i+1)+': '+BEATS[i].ey);d.title=(i+1)+'. '+BEATS[i].ey;
+    (function(k,dd){dd.onclick=function(){setBeat(k)};
+      dd.onmouseenter=function(){var r=dd.getBoundingClientRect();
+        tip.textContent='№ '+(k+1<10?'0':'')+(k+1)+' — '+BEATS[k].ey;
+        tip.style.left=(r.left+r.width/2)+'px';tip.style.top=r.top+'px';tip.classList.add('on')};
+      dd.onmouseleave=function(){tip.classList.remove('on')};})(i,d);
+    tl.appendChild(d)}
+  [['Pressure',1.5],['The turn',4.5],['The proof',6.5],['The path',9.5]].forEach(function(a){
+    var al=document.createElement('div');al.className='actlab';al.style.left=(a[1]/(N-1)*100)+'%';al.textContent=a[0];tl.appendChild(al)});
+  [3.5,5.5,7.5].forEach(function(bx){
+    var dv=document.createElement('div');dv.className='actdiv';dv.style.left=(bx/(N-1)*100)+'%';tl.appendChild(dv)});
   [['Prove',8],['Incubate',9],['Acquire',10]].forEach(function(g){
     var gm=document.createElement('div');gm.className='gate';gm.style.left=(g[1]/(N-1)*100)+'%';tl.appendChild(gm);
     var gl=document.createElement('div');gl.className='gatelab';gl.style.left=(g[1]/(N-1)*100)+'%';gl.textContent=g[0];tl.appendChild(gl)})})();
@@ -1120,13 +1146,15 @@ function closeSources(){$('smodal').classList.remove('on');if(!drill.classList.c
 $('btnSources').onclick=openSources;
 $('smodalX').onclick=closeSources;
 
-/* touch swipe */
-var tx=null;
-document.addEventListener('touchstart',function(e){tx=e.touches[0].clientX},{passive:true});
+/* touch swipe (ignore horizontal pans that begin inside the scrollable diagram) */
+var tx=null,ty=null,txInDia=false;
+document.addEventListener('touchstart',function(e){tx=e.touches[0].clientX;ty=e.touches[0].clientY;
+  txInDia=!!(e.target&&e.target.closest&&e.target.closest('#dwrap'))},{passive:true});
 document.addEventListener('touchend',function(e){if(tx===null)return;
-  var dx=e.changedTouches[0].clientX-tx;tx=null;
+  var dx=e.changedTouches[0].clientX-tx,dy=e.changedTouches[0].clientY-ty,inDia=txInDia;tx=null;ty=null;txInDia=false;
+  if(inDia)return;
   if(drill.classList.contains('on')||$('smodal').classList.contains('on'))return;
-  if(Math.abs(dx)>60)setBeat(cur+(dx<0?1:-1))},{passive:true});
+  if(Math.abs(dx)>60&&Math.abs(dx)>Math.abs(dy)*1.3)setBeat(cur+(dx<0?1:-1))},{passive:true});
 
 setBeat(0,true);
 })();
